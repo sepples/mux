@@ -4,16 +4,24 @@
 
 ---
 
-Package `sepples/mux` implements a request router and dispatcher for matching incoming requests to
-their respective handler.
+This is a personal fork of the excellent `gorilla/mux` library. I have made this fork purely because the original
+project has stopped and archived its repositories.
 
-The name mux stands for "HTTP request multiplexer". Like the standard `http.ServeMux`, `mux.Router` matches incoming requests against a list of registered routes and calls a handler for the route that matches the URL or other conditions. The main features are:
+Package `sepples/mux` implements a request router and dispatcher for matching incoming requests to their respective
+handler.
+
+The name mux stands for "HTTP request multiplexer". Like the standard `http.ServeMux`, `mux.Router` matches incoming
+requests against a list of registered routes and calls a handler for the route that matches the URL or other
+conditions. The main features are:
 
 * It implements the `http.Handler` interface so it is compatible with the standard `http.ServeMux`.
-* Requests can be matched based on URL host, path, path prefix, schemes, header and query values, HTTP methods or using custom matchers.
+* Requests can be matched based on URL host, path, path prefix, schemes, header and query values, HTTP methods or
+  using custom matchers.
 * URL hosts, paths and query values can have variables with an optional regular expression.
 * Registered URLs can be built, or "reversed", which helps maintaining references to resources.
-* Routes can be used as subrouters: nested routes are only tested if the parent route matches. This is useful to define groups of routes that share common conditions like a host, a path prefix or other repeated attributes. As a bonus, this optimizes request matching.
+* Routes can be used as subrouters: nested routes are only tested if the parent route matches. This is useful to
+  define groups of routes that share common conditions like a host, a path prefix or other repeated attributes. As a
+  bonus, this optimizes request matching.
 
 ---
 
@@ -54,9 +62,12 @@ func main() {
 }
 ```
 
-Here we register three routes mapping URL paths to handlers. This is equivalent to how `http.HandleFunc()` works: if an incoming request URL matches one of the paths, the corresponding handler is called passing (`http.ResponseWriter`, `*http.Request`) as parameters.
+Here we register three routes mapping URL paths to handlers. This is equivalent to how `http.HandleFunc()` works: if
+an incoming request URL matches one of the paths, the corresponding handler is called passing
+(`http.ResponseWriter`, `*http.Request`) as parameters.
 
-Paths can have variables. They are defined using the format `{name}` or `{name:pattern}`. If a regular expression pattern is not defined, the matched variable will be anything until the next slash. For example:
+Paths can have variables. They are defined using the format `{name}` or `{name:pattern}`. If a regular expression
+pattern is not defined, the matched variable will be anything until the next slash. For example:
 
 ```go
 r := mux.NewRouter()
@@ -79,7 +90,8 @@ And this is all you need to know about the basic usage. More advanced options ar
 
 ### Matching Routes
 
-Routes can also be restricted to a domain or subdomain. Just define a host pattern to be matched. They can also have variables:
+Routes can also be restricted to a domain or subdomain. Just define a host pattern to be matched. They can also have
+variables:
 
 ```go
 r := mux.NewRouter()
@@ -144,9 +156,11 @@ r.HandleFunc("/specific", specificHandler)
 r.PathPrefix("/").Handler(catchAllHandler)
 ```
 
-Setting the same matching conditions again and again can be boring, so we have a way to group several routes that share the same requirements. We call it "subrouting".
+Setting the same matching conditions again and again can be boring, so we have a way to group several routes that
+share the same requirements. We call it "subrouting".
 
-For example, let's say we have several URLs that should only match when the host is `www.example.com`. Create a route for that host and get a "subrouter" from it:
+For example, let's say we have several URLs that should only match when the host is `www.example.com`. Create a route
+for that host and get a "subrouter" from it:
 
 ```go
 r := mux.NewRouter()
@@ -161,11 +175,15 @@ s.HandleFunc("/products/{key}", ProductHandler)
 s.HandleFunc("/articles/{category}/{id:[0-9]+}", ArticleHandler)
 ```
 
-The three URL paths we registered above will only be tested if the domain is `www.example.com`, because the subrouter is tested first. This is not only convenient, but also optimizes request matching. You can create subrouters combining any attribute matchers accepted by a route.
+The three URL paths we registered above will only be tested if the domain is `www.example.com`, because the subrouter
+is tested first. This is not only convenient, but also optimizes request matching. You can create subrouters combining
+any attribute matchers accepted by a route.
 
-Subrouters can be used to create domain or path "namespaces": you define subrouters in a central place and then parts of the app can register its paths relatively to a given subrouter.
+Subrouters can be used to create domain or path "namespaces": you define subrouters in a central place and then parts
+of the app can register its paths relatively to a given subrouter.
 
-There's one more thing about subroutes. When a subrouter has a path prefix, the inner routes use it as base for their paths:
+There's one more thing about subroutes. When a subrouter has a path prefix, the inner routes use it as base for their
+paths:
 
 ```go
 r := mux.NewRouter()
@@ -210,9 +228,9 @@ func main() {
 
 ### Serving Single Page Applications
 
-Most of the time it makes sense to serve your SPA on a separate web server from your API,
-but sometimes it's desirable to serve them both from one place. It's possible to write a simple
-handler for serving your SPA (for use with React Router's [BrowserRouter](https://reacttraining.com/react-router/web/api/BrowserRouter) for example), and leverage
+Most of the time it makes sense to serve your SPA on a separate web server from your API, but sometimes it's desirable
+to serve them both from one place. It's possible to write a simple handler for serving your SPA (for use with React
+Router's [BrowserRouter](https://reacttraining.com/react-router/web/api/BrowserRouter) for example), and leverage
 mux's powerful routing for your API endpoints.
 
 ```go
@@ -299,7 +317,8 @@ func main() {
 
 Now let's see how to build registered URLs.
 
-Routes can be named. All routes that define a name can have their URLs built, or "reversed". We define a name calling `Name()` on a route. For example:
+Routes can be named. All routes that define a name can have their URLs built, or "reversed". We define a name calling
+`Name()` on a route. For example:
 
 ```go
 r := mux.NewRouter()
@@ -307,7 +326,8 @@ r.HandleFunc("/articles/{category}/{id:[0-9]+}", ArticleHandler).
   Name("article")
 ```
 
-To build a URL, get the route and call the `URL()` method, passing a sequence of key/value pairs for the route variables. For the previous route, we would do:
+To build a URL, get the route and call the `URL()` method, passing a sequence of key/value pairs for the route
+variables. For the previous route, we would do:
 
 ```go
 url, err := r.Get("article").URL("category", "technology", "id", "42")
@@ -336,7 +356,9 @@ url, err := r.Get("article").URL("subdomain", "news",
                                  "filter", "gorilla")
 ```
 
-All variables defined in the route are required, and their values must conform to the corresponding patterns. These requirements guarantee that a generated URL will always match a registered route -- the only exception is for explicitly defined "build-only" routes which never match.
+All variables defined in the route are required, and their values must conform to the corresponding patterns. These
+requirements guarantee that a generated URL will always match a registered route -- the only exception is for
+explicitly defined "build-only" routes which never match.
 
 Regex support also exists for matching Headers within a route. For example, we could do:
 
@@ -346,7 +368,8 @@ r.HeadersRegexp("Content-Type", "application/(text|json)")
 
 ...and the route will match both requests with a Content-Type of `application/json` as well as `application/text`
 
-There's also a way to build only the URL host or path for a route: use the methods `URLHost()` or `URLPath()` instead. For the previous route, we would do:
+There's also a way to build only the URL host or path for a route: use the methods `URLHost()` or `URLPath()` instead.
+For the previous route, we would do:
 
 ```go
 // "http://news.example.com/"
@@ -433,7 +456,8 @@ func main() {
 
 ### Graceful Shutdown
 
-Go 1.8 introduced the ability to [gracefully shutdown](https://golang.org/doc/go1.8#http_shutdown) a `*http.Server`. Here's how to do that alongside `mux`:
+Go 1.8 introduced the ability to [gracefully shutdown](https://golang.org/doc/go1.8#http_shutdown) a `*http.Server`.
+Here's how to do that alongside `mux`:
 
 ```go
 package main
@@ -498,8 +522,10 @@ func main() {
 
 ### Middleware
 
-Mux supports the addition of middlewares to a [Router](https://godoc.org/github.com/sepples/mux#Router), which are executed in the order they are added if a match is found, including its subrouters.
-Middlewares are (typically) small pieces of code which take one request, do something with it, and pass it down to another middleware or the final handler. Some common use cases for middleware are request logging, header manipulation, or `ResponseWriter` hijacking.
+Mux supports the addition of middlewares to a [Router](https://godoc.org/github.com/sepples/mux#Router), which are
+executed in the order they are added if a match is found, including its subrouters. Middlewares are (typically) small
+pieces of code which take one request, do something with it, and pass it down to another middleware or the final
+handler. Some common use cases for middleware are request logging, header manipulation, or `ResponseWriter` hijacking.
 
 Mux middlewares are defined using the de facto standard type:
 
@@ -507,7 +533,9 @@ Mux middlewares are defined using the de facto standard type:
 type MiddlewareFunc func(http.Handler) http.Handler
 ```
 
-Typically, the returned handler is a closure which does something with the http.ResponseWriter and http.Request passed to it, and then calls the handler passed as parameter to the MiddlewareFunc. This takes advantage of closures being able access variables from the context where they are created, while retaining the signature enforced by the receivers.
+Typically, the returned handler is a closure which does something with the http.ResponseWriter and http.Request passed
+to it, and then calls the handler passed as parameter to the MiddlewareFunc. This takes advantage of closures being
+able access variables from the context where they are created, while retaining the signature enforced by the receivers.
 
 A very basic middleware which logs the URI of the request being handled could be written as:
 
@@ -574,11 +602,15 @@ amw.Populate()
 r.Use(amw.Middleware)
 ```
 
-Note: The handler chain will be stopped if your middleware doesn't call `next.ServeHTTP()` with the corresponding parameters. This can be used to abort a request if the middleware writer wants to. Middlewares _should_ write to `ResponseWriter` if they _are_ going to terminate the request, and they _should not_ write to `ResponseWriter` if they _are not_ going to terminate it.
+Note: The handler chain will be stopped if your middleware doesn't call `next.ServeHTTP()` with the corresponding
+parameters. This can be used to abort a request if the middleware writer wants to. Middlewares _should_ write to
+`ResponseWriter` if they _are_ going to terminate the request, and they _should not_ write to `ResponseWriter` if
+they _are not_ going to terminate it.
 
 ### Handling CORS Requests
 
-[CORSMethodMiddleware](https://godoc.org/github.com/sepples/mux#CORSMethodMiddleware) intends to make it easier to strictly set the `Access-Control-Allow-Methods` response header.
+[CORSMethodMiddleware](https://godoc.org/github.com/sepples/mux#CORSMethodMiddleware) intends to make it easier to
+strictly set the `Access-Control-Allow-Methods` response header.
 
 * You will still need to use your own CORS handler to set the other CORS headers such as `Access-Control-Allow-Origin`
 * The middleware will set the `Access-Control-Allow-Methods` header to all the method matchers (e.g. `r.Methods(http.MethodGet, http.MethodPut, http.MethodOptions)` -> `Access-Control-Allow-Methods: GET,PUT,OPTIONS`) on a route
